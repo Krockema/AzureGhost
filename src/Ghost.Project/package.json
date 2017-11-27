@@ -6,7 +6,7 @@
   "scripts": {
     "postinstall" : "npm run ghost:copycasper && npm run ghost:db",
     "ghost:db" : "node db.js",
-    "ghost:copycasper": "xcopy node_modules\\ghost\\content\\themes content\\themes\\casper /y /e /r /i"
+    "ghost:copycasper": "xcopy node_modules\\ghost\\content\\themes content\\themes /y /e /r /i"
   },
   "author": "",
   "license": "MIT",
