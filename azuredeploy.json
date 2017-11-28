@@ -1,134 +1,215 @@
 {
-    "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
-    "contentVersion": "1.0.0.0",
-    "parameters": {
-      "siteName": {
-        "type": "string"
-      },
-      "hostingPlanName": {
-        "type": "string"
-      },
-      "siteLocation": {
-        "type": "string"
-      },
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.2",
+  "parameters": {
+    "siteName": {
+      "type": "string"
+    },
+    "hostingPlanName": {
+      "type": "string"
+    },
+    "siteLocation": {
+      "type": "string"
+    },
+    "sku": {
+      "type": "string",
+      "allowedValues": [
+        "Free",
+        "Shared",
+        "Basic",
+        "Standard",
+        "Premium"
+      ],
+      "defaultValue": "Free"
+    },
+    "Worker Size": {
+      "type": "string",
+      "allowedValues": [
+        "1",
+        "2",
+        "3"
+      ],
+      "defaultValue": "1"
+    },
+    "Deploy App Insights": {
+      "type": "string",
+      "allowedValues": [
+        "true",
+        "false"
+      ],
+      "defaultValue": "false"
+    },
+    "Email Service": {
+      "type": "string",
+      "allowedValues": [
+        "Not configured",
+        "Mailgun",
+        "Gmail",
+        "SendGrid"
+      ],
+      "defaultValue": "Not configured"
+    },
+    "Email Username": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "Email Password": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "Email From Address": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "repoUrl": {
+      "type": "string"
+    },
+    "branch": {
+      "type": "string"
+    },
+    "isManualIntegration": {
+      "type": "bool",
+      "defaultValue": true
+    },
+    "isMercurial": {
+      "type": "bool",
+      "defaultValue": false
+    },
+    "Node Version": {
+      "type": "string",
+      "defaultValue": "8.9.0"
+    },
+    "ghostUrl": {
+      "type": "string",
+      "defaultValue": ""
+    }
+  },
+  "variables": {
+    "webSettings": {
+      "phpVersion": "",
+      "javaVersion": "",
+      "pythonVersion": ""
+    },
+    "ghostUrl": "[if(equals(parameters('ghostUrl'), ''), concat('https://', parameters('siteName'), '.azurewebsites.net'), parameters('ghostUrl'))]",
+    "storageAccountName": "[uniqueString(resourceGroup().id, '723bd985-94ac-4a30-9859-1e418b730786')]",
+    "skuMapping": "[if(equals(parameters('sku'), 'Free'), 'F', if(equals(parameters('sku'), 'Shared'), 'D', if(equals(parameters('sku'), 'Basic'), 'B', if(equals(parameters('sku'), 'Standard'), 'S', if(equals(parameters('sku'), 'Premium'), 'P', 'F')))))]",
+    "sku": "[concat(variables('skuMapping'), parameters('Worker Size'))]",
+    "appInsightsName": "[concat(parameters('siteName'), '-insights')]",
+    "appsettings":{
+      "url": "[variables('ghostUrl')]",
+      "WEBSITE_NODE_DEFAULT_VERSION": "[parameters('Node Version')]",
+      "APPINSIGHTS_INSTRUMENTATION_KEY": "[reference(concat('Microsoft.Insights/components/', variables('appInsightsName'))).InstrumentationKey]",
+      "AZURE_STORAGE_CONNECTION_STRING": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('StorageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value)]"
+    },
+    "mailsettings":{
+      "mail__transport": "SMTP",
+      "mail__options__service": "[parameters('Email Service')]",
+      "mail__options__auth__user": "[parameters('Email Username')]",
+      "mail__options__auth__pass": "[parameters('Email Password')]",
+      "mail__from": "[parameters('Email From Address')]"
+    }
+  },
+  "resources": [
+    {
+      "name": "[parameters('hostingPlanName')]",
+      "type": "Microsoft.Web/serverfarms",
+      "location": "[parameters('siteLocation')]",
+      "apiVersion": "2016-09-01",
       "sku": {
-        "type": "string",
-        "allowedValues": [
-          "Free",
-          "Shared",
-          "Basic",
-          "Standard"
-        ],
-        "defaultValue": "Free"
+        "name": "[variables('sku')]"
       },
-      "workerSize": {
-        "type": "string",
-        "allowedValues": [
-          "0",
-          "1",
-          "2"
-        ],
-        "defaultValue": "0"
-      },
-      "repoUrl": {
-        "type": "string"
-      },
-      "branch": {
-        "type": "string"
-      },
-      "isManualIntegration": {
-          "type": "bool",
-          "defaultValue": true
-      },
-      "isMercurial":{
-        "type": "bool",
-        "defaultValue":false
-      },
-      "azureNodeVersion":{
-        "type": "string",
-        "defaultValue": "8.9.0"
-      },
-      "ghostUrl":{
-        "type": "string",
-        "defaultValue": ""
-      }
-    },
-    "variables": {
-      "ghostUrl": "[if(equals(parameters('ghostUrl'), ''), concat('https://', parameters('siteName'), '.azurewebsites.net'), parameters('ghostUrl'))]",
-      "storageAccountName": "[uniqueString(resourceGroup().id, '723bd985-94ac-4a30-9859-1e418b730786')]"
-    },
-    "resources": [
-      {
-        "apiVersion": "2014-06-01",
+      "dependsOn": [],
+      "properties": {
         "name": "[parameters('hostingPlanName')]",
-        "type": "Microsoft.Web/serverfarms",
-        "location": "[parameters('siteLocation')]",
-        "properties": {
-          "name": "[parameters('hostingPlanName')]",
-          "sku": "[parameters('sku')]",
-          "workerSize": "[parameters('workerSize')]",
-          "numberOfWorkers": 1
-        }
-      },
-      {
-          "name": "[variables('storageAccountName')]",
-          "type": "Microsoft.Storage/storageAccounts",
-          "location": "[resourceGroup().location]",
-          "apiVersion": "2016-01-01",
-          "sku": {
-              "name": "Standard_LRS"
-          },
-          "dependsOn": [],
-          "tags": {
-              "displayName": "Storage"
-          },
-          "kind": "Storage"
-      },
-      {
-        "apiVersion": "2014-06-01",
-        "name": "[parameters('siteName')]",
-        "type": "Microsoft.Web/sites",
-        "location": "[parameters('siteLocation')]",
-        "tags": {
-          "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', parameters('hostingPlanName'))]": "Resource"
-        },
-        "dependsOn": [
-          "[resourceId('Microsoft.Web/serverfarms', parameters('hostingPlanName'))]",
-          "[variables('storageAccountName')]"
-        ],
-        "properties": {
-          "name": "[parameters('siteName')]",
-          "serverFarm": "[parameters('hostingPlanName')]"
-        },
-        "resources": [
-            {
-              "apiVersion": "2015-08-01",
-              "name": "appsettings",
-              "type": "config",
-              "dependsOn": [
-                  "[concat('Microsoft.Web/Sites/', parameters('siteName'))]"
-              ],
-              "properties": {
-                "url": "[variables('ghostUrl')]",
-                "WEBSITE_NODE_DEFAULT_VERSION": "[parameters('azureNodeVersion')]",
-                "AZURE_STORAGE_CONNECTION_STRING": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('StorageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value)]"
-              }
-            },
-          {
-            "apiVersion": "2014-06-01",
-            "name": "web",
-            "type": "sourcecontrols",
-            "dependsOn": [
-              "[resourceId('Microsoft.Web/Sites', parameters('siteName'))]"
-            ],
-            "properties": {
-              "RepoUrl": "[parameters('repoUrl')]",
-              "branch": "[parameters('branch')]",
-              "IsManualIntegration": "[parameters('isManualIntegration')]",
-              "IsMercurial": "[parameters('isMercurial')]"
-            }
-          }
-        ]
+        "numberOfWorkers": "[parameters('Worker Size')]"
       }
-    ]
-  }
+    },
+    {
+      "name": "[variables('storageAccountName')]",
+      "type": "Microsoft.Storage/storageAccounts",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2016-01-01",
+      "sku": {
+        "name": "Standard_LRS"
+      },
+      "dependsOn": [],
+      "tags": {
+        "displayName": "Storage"
+      },
+      "kind": "Storage"
+    },
+    {
+      "name": "[parameters('siteName')]",
+      "type": "Microsoft.Web/sites",
+      "location": "[parameters('siteLocation')]",
+      "apiVersion": "2016-08-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', parameters('hostingPlanName'))]"
+      ],
+      "tags": {
+        "[concat('hidden-related:', resourceId('Microsoft.Web/serverfarms', parameters('hostingPlanName')))]": "Resource",
+        "displayName": "[parameters('siteName')]"
+      },
+      "properties": {
+        "name": "[parameters('siteName')]",
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('hostingPlanName'))]"
+      },
+      "resources": [
+        {
+          "apiVersion": "2015-08-01",
+          "name": "web",
+          "type": "config",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/sites', parameters('webSiteName'))]"
+          ],
+          "tags": {
+            "displayName": "WebSettings"
+          },
+          "properties": "[variables('webSettings')]"
+        },
+        {
+          "name": "appsettings",
+          "type": "config",
+          "apiVersion": "2016-08-01",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/sites', parameters('siteName'))]",
+            "[resourceId('Microsoft.Web/sites/sourcecontrols', parameters('siteName'), 'web')]",
+            "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
+          ],
+          "properties": "[union(variables('appsettings'), if(equals(parameters('Email Service'), 'Not configured'), json('null'), variables('mailsettings'))]"
+        },
+        {
+          "name": "web",
+          "type": "sourcecontrols",
+          "apiVersion": "2016-08-01",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/sites', parameters('siteName'))]"
+          ],
+          "properties": {
+            "repoUrl": "[parameters('repoUrl')]",
+            "branch": "[parameters('branch')]",
+            "isManualIntegration": true,
+            "deploymentRollbackEnabled": true
+          }
+        }
+      ]
+    },
+    {
+      "name": "[variables('appInsightsName')]",
+      "type": "Microsoft.Insights/components",
+      "location": "[parameters('siteLocation')]",
+      "apiVersion": "2014-04-01",
+      "condition": "[equals(parameters('Deploy App Insights'), 'true')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('siteName'))]"
+      ],
+      "tags": {
+        "displayName": "[variables('appInsightsName')]"
+      },
+      "properties": {
+        "ApplicationId": "[resourceId('Microsoft.Web/sites', parameters('siteName'))]",
+        "Application_Type": "Node.JS"
+      }
+    }
+  ]
+}
