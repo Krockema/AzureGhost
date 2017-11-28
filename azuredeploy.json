@@ -94,20 +94,7 @@
     "storageAccountName": "[uniqueString(resourceGroup().id, '723bd985-94ac-4a30-9859-1e418b730786')]",
     "skuMapping": "[if(equals(parameters('sku'), 'Free'), 'F', if(equals(parameters('sku'), 'Shared'), 'D', if(equals(parameters('sku'), 'Basic'), 'B', if(equals(parameters('sku'), 'Standard'), 'S', if(equals(parameters('sku'), 'Premium'), 'P', 'F')))))]",
     "sku": "[concat(variables('skuMapping'), parameters('Worker Size'))]",
-    "appInsightsName": "[concat(parameters('siteName'), '-insights')]",
-    "appsettings":{
-      "url": "[variables('ghostUrl')]",
-      "WEBSITE_NODE_DEFAULT_VERSION": "[parameters('Node Version')]",
-      "APPINSIGHTS_INSTRUMENTATION_KEY": "[reference(concat('Microsoft.Insights/components/', variables('appInsightsName'))).InstrumentationKey]",
-      "AZURE_STORAGE_CONNECTION_STRING": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('StorageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value)]"
-    },
-    "mailsettings":{
-      "mail__transport": "SMTP",
-      "mail__options__service": "[parameters('Email Service')]",
-      "mail__options__auth__user": "[parameters('Email Username')]",
-      "mail__options__auth__pass": "[parameters('Email Password')]",
-      "mail__from": "[parameters('Email From Address')]"
-    }
+    "appInsightsName": "[concat(parameters('siteName'), '-insights')]"
   },
   "resources": [
     {
@@ -176,7 +163,29 @@
             "[resourceId('Microsoft.Web/sites/sourcecontrols', parameters('siteName'), 'web')]",
             "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
           ],
-          "properties": "[union(variables('appsettings'), if(equals(parameters('Email Service'), 'Not configured'), json('null'), variables('mailsettings'))]"
+          "properties": {
+            "url": "[variables('ghostUrl')]",
+            "WEBSITE_NODE_DEFAULT_VERSION": "[parameters('Node Version')]",
+            "APPINSIGHTS_INSTRUMENTATION_KEY": "[reference(concat('Microsoft.Insights/components/', variables('appInsightsName'))).InstrumentationKey]",
+            "AZURE_STORAGE_CONNECTION_STRING": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('StorageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value)]"
+          }
+        },{
+          "name": "appsettings",
+          "type": "config",
+          "apiVersion": "2016-08-01",
+          "condition": "[not(equals(parameters('Email Service'), 'Not configured'))]",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/sites', parameters('siteName'))]",
+            "[resourceId('Microsoft.Web/sites/sourcecontrols', parameters('siteName'), 'web')]",
+            "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
+          ],
+          "properties": {
+            "mail__transport": "SMTP",
+            "mail__options__service": "[parameters('Email Service')]",
+            "mail__options__auth__user": "[parameters('Email Username')]",
+            "mail__options__auth__pass": "[parameters('Email Password')]",
+            "mail__from": "[parameters('Email From Address')]"
+          }
         },
         {
           "name": "web",
