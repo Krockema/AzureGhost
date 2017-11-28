@@ -8,5 +8,12 @@
     },
     "paths": {
       "contentPath": "content"
+    },
+    "storage": {
+        "active": "ghost-azure-storage",
+        "ghost-azure-storage": {
+            "container": "ghost",
+            "useHttps" : "true"
+        }
     }
 }

@@ -6,12 +6,13 @@
   "scripts": {
     "postinstall" : "npm run ghost:copycasper && npm run ghost:db",
     "ghost:db" : "node db.js",
-    "ghost:copycasper": "xcopy node_modules\\ghost\\content\\themes content\\themes /y /e /r /i"
+    "ghost:copycasper": "node CopyContent.js"
   },
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "ghost":"1.18.0"
+    "ghost":"1.18.0",
+    "ghost-azure-storage":"2.0.0"
   },
   "optionalDependencies": {
     "sqlite3": "3.1.13"

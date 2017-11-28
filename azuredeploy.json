@@ -54,7 +54,8 @@
       }
     },
     "variables": {
-      "ghostUrl": "[if(equals(parameters('ghostUrl'), ''), concat('https://', parameters('siteName'), '.azurewebsites.net'), parameters('ghostUrl'))]"
+      "ghostUrl": "[if(equals(parameters('ghostUrl'), ''), concat('https://', parameters('siteName'), '.azurewebsites.net'), parameters('ghostUrl'))]",
+      "storageAccountName": "[uniqueString(resourceGroup().id, '723bd985-94ac-4a30-9859-1e418b730786')]"
     },
     "resources": [
       {
@@ -70,6 +71,20 @@
         }
       },
       {
+          "name": "[variables('storageAccountName')]",
+          "type": "Microsoft.Storage/storageAccounts",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2016-01-01",
+          "sku": {
+              "name": "Standard_LRS"
+          },
+          "dependsOn": [],
+          "tags": {
+              "displayName": "Storage"
+          },
+          "kind": "Storage"
+      },
+      {
         "apiVersion": "2014-06-01",
         "name": "[parameters('siteName')]",
         "type": "Microsoft.Web/sites",
@@ -78,7 +93,8 @@
           "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', parameters('hostingPlanName'))]": "Resource"
         },
         "dependsOn": [
-          "[resourceId('Microsoft.Web/serverfarms', parameters('hostingPlanName'))]"
+          "[resourceId('Microsoft.Web/serverfarms', parameters('hostingPlanName'))]",
+          "[variables('storageAccountName')]"
         ],
         "properties": {
           "name": "[parameters('siteName')]",
@@ -94,7 +110,8 @@
               ],
               "properties": {
                 "url": "[variables('ghostUrl')]",
-                "WEBSITE_NODE_DEFAULT_VERSION": "[parameters('azureNodeVersion')]"
+                "WEBSITE_NODE_DEFAULT_VERSION": "[parameters('azureNodeVersion')]",
+                "AZURE_STORAGE_CONNECTION_STRING": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('StorageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value)]"
               }
             },
           {
