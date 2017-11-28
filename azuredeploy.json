@@ -86,27 +86,19 @@
         },
         "resources": [
             {
-                "apiVersion": "2014-04-01",
-                "type": "config",
-                "name": "web",
-                "dependsOn": [
-                    "[concat('Microsoft.Web/Sites/', parameters('siteName'))]"
-                ],
-                "properties": {
-                    "appSettings": [
-                    {
-                        "name": "url",
-                        "value": "[variables('ghostUrl')]"
-                    },
-                    {
-                        "name": "WEBSITE_NODE_DEFAULT_VERSION",
-                        "value": "[parameters('azureNodeVersion')]"
-                    }
-                    ]
-                }
+              "apiVersion": "2015-08-01",
+              "name": "appsettings",
+              "type": "config",
+              "dependsOn": [
+                  "[concat('Microsoft.Web/Sites/', parameters('siteName'))]"
+              ],
+              "properties": {
+                "url": "[variables('ghostUrl')]",
+                "WEBSITE_NODE_DEFAULT_VERSION": "[parameters('azureNodeVersion')]"
+              }
             },
           {
-            "apiVersion": "2014-04-01",
+            "apiVersion": "2014-06-01",
             "name": "web",
             "type": "sourcecontrols",
             "dependsOn": [
