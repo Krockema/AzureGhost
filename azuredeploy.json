@@ -31,14 +31,6 @@
       ],
       "defaultValue": "1"
     },
-    "Deploy App Insights": {
-      "type": "string",
-      "allowedValues": [
-        "true",
-        "false"
-      ],
-      "defaultValue": "false"
-    },
     "Email Service": {
       "type": "string",
       "allowedValues": [
@@ -196,7 +188,6 @@
       "type": "Microsoft.Insights/components",
       "location": "[parameters('siteLocation')]",
       "apiVersion": "2014-04-01",
-      "condition": "[equals(parameters('Deploy App Insights'), 'true')]",
       "dependsOn": [
         "[resourceId('Microsoft.Web/sites', parameters('siteName'))]"
       ],

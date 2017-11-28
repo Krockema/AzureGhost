@@ -11,6 +11,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "applicationinsights": "1.0.0",
     "ghost":"1.18.0",
     "ghost-azure-storage":"2.0.0"
   },
