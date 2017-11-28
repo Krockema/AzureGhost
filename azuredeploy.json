@@ -49,8 +49,11 @@
       },
       "ghostUrl":{
         "type": "string",
-        "defaultValue": "[concat('https://', parameters('siteName'), '.azurewebsites.net')]"
+        "defaultValue": ""
       }
+    },
+    "variables": {
+      "ghostUrl": "[if(equals(parameters('ghostUrl'), ''), concat('https://', parameters('siteName'), '.azurewebsites.net'), parameters('ghostUrl'))]"
     },
     "resources": [
       {
@@ -92,7 +95,7 @@
                     "appSettings": [
                     {
                         "name": "url",
-                        "value": "[parameters('ghostUrl')]"
+                        "value": "[variables('ghostUrl')]"
                     },
                     {
                         "name": "WEBSITE_NODE_DEFAULT_VERSION",
