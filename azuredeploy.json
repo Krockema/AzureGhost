@@ -45,7 +45,8 @@
         "defaultValue":false
       },
       "azureNodeVersion":{
-        "type": "string"
+        "type": "string",
+        "defaultValue": "8.9.0"
       },
       "ghostUrl":{
         "type": "string",
