@@ -49,7 +49,7 @@
       },
       "ghostUrl":{
         "type": "string",
-        "default": "[concat('https://', parameters('siteName'), '.azurewebsites.net')]"
+        "defaultValue": "[concat('https://', parameters('siteName'), '.azurewebsites.net')]"
       }
     },
     "resources": [
