@@ -2,7 +2,7 @@
     "database": {
         "client": "sqlite3",
         "connection": {
-            "filename": "content/data/ghost-dev.db"
+            "filename": "content/data/ghost.db"
         },
         "debug": false
     },
