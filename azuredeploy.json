@@ -85,8 +85,7 @@
     "ghostUrl": "[if(equals(parameters('ghostUrl'), ''), concat('https://', parameters('siteName'), '.azurewebsites.net'), parameters('ghostUrl'))]",
     "storageAccountName": "[uniqueString(resourceGroup().id, '723bd985-94ac-4a30-9859-1e418b730786')]",
     "skuMapping": "[if(equals(parameters('sku'), 'Free'), 'F', if(equals(parameters('sku'), 'Shared'), 'D', if(equals(parameters('sku'), 'Basic'), 'B', if(equals(parameters('sku'), 'Standard'), 'S', if(equals(parameters('sku'), 'Premium'), 'P', 'F')))))]",
-    "sku": "[concat(variables('skuMapping'), parameters('Worker Size'))]",
-    "appInsightsName": "[concat(parameters('siteName'), '-insights')]"
+    "sku": "[concat(variables('skuMapping'), parameters('Worker Size'))]"
   },
   "resources": [
     {
@@ -152,13 +151,11 @@
           "apiVersion": "2016-08-01",
           "dependsOn": [
             "[resourceId('Microsoft.Web/sites', parameters('siteName'))]",
-            "[resourceId('Microsoft.Web/sites/sourcecontrols', parameters('siteName'), 'web')]",
-            "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
+            "[resourceId('Microsoft.Web/sites/sourcecontrols', parameters('siteName'), 'web')]"
           ],
           "properties": {
             "url": "[variables('ghostUrl')]",
             "WEBSITE_NODE_DEFAULT_VERSION": "[parameters('Node Version')]",
-            "APPINSIGHTS_INSTRUMENTATION_KEY": "[reference(concat('Microsoft.Insights/components/', variables('appInsightsName'))).InstrumentationKey]",
             "AZURE_STORAGE_CONNECTION_STRING": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('StorageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value)]",
             "mail__transport": "SMTP",
             "mail__options__service": "[parameters('Email Service')]",
@@ -182,22 +179,6 @@
           }
         }
       ]
-    },
-    {
-      "name": "[variables('appInsightsName')]",
-      "type": "Microsoft.Insights/components",
-      "location": "[parameters('siteLocation')]",
-      "apiVersion": "2014-04-01",
-      "dependsOn": [
-        "[resourceId('Microsoft.Web/sites', parameters('siteName'))]"
-      ],
-      "tags": {
-        "displayName": "[variables('appInsightsName')]"
-      },
-      "properties": {
-        "ApplicationId": "[resourceId('Microsoft.Web/sites', parameters('siteName'))]",
-        "Application_Type": "Node.JS"
-      }
     }
   ]
 }
