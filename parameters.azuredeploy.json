@@ -3,13 +3,13 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
       "siteName": {
-        "value": "azureghostblog"
+        "value": ""
       },
       "hostingPlanName": {
-        "value": "azureghostblog"
+        "value": ""
       },
       "siteLocation": {
-        "value": "East US"
+        "value": "West Europe"
       },
       "sku": {
         "value": "Free"
