@@ -69,7 +69,7 @@
     },
     "Node Version": {
       "type": "string",
-      "defaultValue": "8.9.0"
+      "defaultValue": "8.9.4"
     },
     "ghostUrl": {
       "type": "string",
