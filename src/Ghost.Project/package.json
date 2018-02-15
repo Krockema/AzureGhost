@@ -11,10 +11,9 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "ghost":"1.18.0",
-    "ghost-azure-storage":"2.0.0"
-  },
-  "optionalDependencies": {
+    "ghost":"1.21.2",
+    "ghost-azure-storage":"2.0.0",
+    "fs-extra":"5.0.0",
     "sqlite3": "3.1.13"
   }
 }
