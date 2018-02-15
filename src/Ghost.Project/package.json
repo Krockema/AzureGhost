@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "postinstall" : "npm run ghost:copycasper && npm run ghost:db",
-    "ghost:db" : "node db.js",
+    "ghost:db" : "node knex-migrator migrate",
     "ghost:copycasper": "node CopyContent.js"
   },
   "author": "",

@@ -1,5 +1,5 @@
 var config = require('./node_modules/ghost/core/server/config'),
-    ghostVersion = require('./node_modules/ghost/core/server/utils/ghost-version');
+    ghostVersion = require('./node_modules/ghost/core/server/lib/ghost-version');
 
 require('./node_modules/ghost/core/server/overrides');
 
